@@ -7,13 +7,14 @@ export const resolvers = {
 	Query: {
 		getAllTasks: async (obj, args, context, info) => {
 			const user = await Users.findOne({ accessToken: args.id }, { taskList: 1, _id: 0 }).exec()
+			// TODO: check validity
 			const taskIds = user.toObject().taskList
 			return Tasks.find({ '_id': { $in: taskIds } })
 		}
 	},
 	Mutation: {
 		createUser: async (root, args, context) => {
-			const { name, accessToken } = args.info;
+			const { name, accessToken } = args.user;
 			const newUser = {
 				name: name,
 				accessToken: accessToken,

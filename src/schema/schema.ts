@@ -42,7 +42,7 @@ export const typeDefs = gql`
   }
 
 	type Mutation {
-		createUser(info: UserInput): User
+		createUser(user: UserInput): User
 		createTask(task: TaskInput): Task
 		deleteTask(id: String): Boolean
 	}
