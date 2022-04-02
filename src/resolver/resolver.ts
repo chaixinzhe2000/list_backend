@@ -6,10 +6,13 @@ import { dateScalar } from '../schema'
 export const resolvers = {
 	Query: {
 		getAllTasks: async (obj, args, context, info) => {
-			const user = await Users.findOne({ accessToken: args.id }, { taskList: 1, _id: 0 }).exec()
+			const user = await Users.findOne({ accessToken: args.id }, { tasks: 1, _id: 0 }).exec()
 			// TODO: check validity
-			const taskIds = user.toObject().taskList
-			return Tasks.find({ '_id': { $in: taskIds } })
+			if (typeof user !== "undefined" && user != null) {
+				const taskIds = user.toObject().tasks
+				return Tasks.find({ '_id': { $in: taskIds } })
+			}
+			return []
 		}
 	},
 	Mutation: {
@@ -35,7 +38,20 @@ export const resolvers = {
 				updateTime: Date.now()
 			}
 			const resp = await Tasks.create(newTask)
-			return resp
+			// TODO: check validity
+			// update user field
+			const newTaskId = resp.toObject()._id
+			const updateResp =
+				await Users.updateOne({ accessToken: authorToken },
+					{
+						$push: {
+							tasks: {
+								$each: [newTaskId],
+								$position: 0
+							}
+						}
+					})
+			return updateResp
 		}
 	},
 };
